@@ -1,0 +1,62 @@
+fileVersion: 1
+id: 569308a0-7164-41d3-a55e-6e84d1efc560
+name: PSTG_DW_CLIENT_BENCHMARKING_CLIENT_PROGRAM_STAGING_UPDATE
+operation:
+  config:
+    insertStrategy: INSERT
+    postSQL: ""
+    preSQL: |-
+      UPDATE Alliant_DW_Stage.DBO.dw_client_benchmarking_client_program_staging stg
+      SET
+          stg.dw_client_benchmarking_client_id = IFNULL(cbc.dw_client_benchmarking_client_id, -1),
+          stg.client_benchmarking_program_type_id = IFNULL(pt.client_benchmarking_program_type_id, -1),
+          stg.dw_company_id_primary = IFNULL(cp.dw_company_id, -1),
+          stg.dw_company_id_aggregate = IFNULL(ca.dw_company_id, -1),
+          primary_limit = NULLIF(TRY_CAST(REPLACE(REPLACE(stg.source_system_primary_limit, '$', ''), ',', '') AS NUMERIC(38,0)),0),
+          primary_premium = NULLIF(TRY_CAST(REPLACE(REPLACE(stg.source_system_primary_premium, '$', ''), ',', '') AS NUMERIC(38,0)),0),
+          primary_sir_retention = NULLIF(TRY_CAST(REPLACE(REPLACE(stg.source_system_primary_sir_retention, '$', ''), ',', '') AS NUMERIC(38,0)),0),
+          aggregate_limit = NULLIF(TRY_CAST(REPLACE(REPLACE(stg.source_system_aggregate_limit, '$', ''), ',', '') AS NUMERIC(38,0)),0),
+          aggregate_premium = NULLIF(TRY_CAST(REPLACE(REPLACE(stg.source_system_aggregate_premium, '$', ''), ',', '') AS NUMERIC(38,0)),0),
+          aggregate_sir_retention = NULLIF(TRY_CAST(REPLACE(REPLACE(stg.source_system_aggregate_sir_retention, '$', ''), ',', '') AS NUMERIC(38,0)),0)
+      FROM
+          Alliant_DW_Stage.DBO.dw_client_benchmarking_client_program_staging stg_src
+      LEFT JOIN Alliant_DW.DBO.dw_client_benchmarking_client cbc ON stg_src.source_system_policy_line_id = cbc.source_system_policy_line_id
+      LEFT JOIN Alliant_DW.REF.client_benchmarking_program_type pt ON stg_src.program_type_key = pt.program_type_key
+      LEFT JOIN Alliant_DW.DBO.dw_company cp ON stg_src.primary_company_lookup_code = cp.company_lookupcode
+      LEFT JOIN Alliant_DW.DBO.dw_company ca ON stg_src.aggregate_company_lookup_code = ca.company_lookupcode
+      WHERE
+          stg.source_system_policy_line_id = stg_src.source_system_policy_line_id;
+    testsEnabled: true
+    truncateBefore: false
+  database: ""
+  deployEnabled: true
+  description: UPDATE-only conversion of spdw_dw_client_benchmarking_client_program_staging_update
+  isMultisource: false
+  locationName: DBSHIFT
+  materializationType: table
+  metadata:
+    appliedNodeTests: []
+    columns:
+      - appliedColumnTests: {}
+        columnReference:
+          columnCounter: 3b136868-98e3-4c91-90ef-8015f8d689ef
+          stepCounter: 569308a0-7164-41d3-a55e-6e84d1efc560
+        config: {}
+        dataType: TIMESTAMP_NTZ
+        description: ""
+        name: SYSTEM_UPDATE_DATE
+        nullable: true
+        sourceColumnReferences:
+          - columnReferences: []
+            transform: ""
+        transform: CURRENT_TIMESTAMP()
+    cteString: ""
+    enabledColumnTestIDs: []
+    sourceMapping: []
+  name: PSTG_DW_CLIENT_BENCHMARKING_CLIENT_PROGRAM_STAGING_UPDATE
+  overrideSQL: false
+  schema: ""
+  sqlType: persistentStage
+  type: sql
+  version: 1
+type: Node
